@@ -1,0 +1,1 @@
+{"version":3,"file":"SupabaseAuthManager.d.ts","sourceRoot":"","sources":["../../src/auth/SupabaseAuthManager.ts"],"names":[],"mappings":"AAEA,cAAM,WAAW;IACf,OAAO,CAAC,KAAK,CAA8B;IAC3C,OAAO,CAAC,KAAK,CAAqB;;IAMrB,IAAI;IAGJ,MAAM;IAGN,OAAO;CAIrB;;AAED,wBAAiC"}
