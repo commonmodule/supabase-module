@@ -5,7 +5,7 @@ class SupabaseConnector {
   private supabaseUrl: string | undefined;
   private supabaseKey: string | undefined;
 
-  private client: SupabaseClient | undefined;
+  private _client: SupabaseClient | undefined;
   private authTokenManager: AuthTokenManager | undefined;
 
   public isDevMode = false;
@@ -28,13 +28,13 @@ class SupabaseConnector {
   }
 
   private reconnect() {
-    this.client?.removeAllChannels();
+    this._client?.removeAllChannels();
 
     if (!this.supabaseUrl || !this.supabaseKey) {
       throw new Error("SupabaseConnector not initialized");
     }
 
-    this.client = createClient(this.supabaseUrl, this.supabaseKey, {
+    this._client = createClient(this.supabaseUrl, this.supabaseKey, {
       auth: {
         autoRefreshToken: true,
         persistSession: true,
@@ -51,15 +51,26 @@ class SupabaseConnector {
     });
   }
 
-  public async signInWithOAuth(provider: Provider, scopes?: string[]) {
-    if (!this.client) throw new Error("SupabaseConnector not initialized");
+  private get client() {
+    if (!this._client) throw new Error("SupabaseConnector not initialized");
+    return this._client;
+  }
 
+  public async signInWithOAuth(provider: Provider, scopes?: string[]) {
     await this.client.auth.signInWithOAuth({
       provider,
       options: this.isDevMode
         ? { redirectTo: window.location.origin, scopes: scopes?.join(" ") }
         : (scopes ? { scopes: scopes?.join(" ") } : undefined),
     });
+  }
+
+  public async callFunction(functionName: string, body?: Record<string, any>) {
+    const { data, error } = await this.client.functions.invoke(functionName, {
+      body,
+    });
+    if (error) throw error;
+    return data;
   }
 }
 
