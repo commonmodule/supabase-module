@@ -1,11 +1,16 @@
-declare class SupabaseAdapter {
+import { TokenManager } from "@common-module/ts";
+declare class SupabaseConnector {
     private client;
     private supabaseUrl;
     private supabaseKey;
-    init(supabaseUrl: string, supabaseKey: string, authorizationToken?: string): void;
+    private tokenManager;
+    init(options: {
+        supabaseUrl: string;
+        supabaseKey: string;
+        tokenManager?: TokenManager;
+    }): void;
     private reconnect;
-    callFunction(functionName: string, body?: Record<string, any>): Promise<any>;
 }
-declare const _default: SupabaseAdapter;
+declare const _default: SupabaseConnector;
 export default _default;
 //# sourceMappingURL=SupabaseAdapter.d.ts.map
