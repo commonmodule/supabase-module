@@ -39,7 +39,7 @@ class SupabaseConnector {
         autoRefreshToken: true,
         persistSession: true,
       },
-      ...(this.authTokenManager
+      ...(this.authTokenManager?.token
         ? {
           global: {
             headers: {
