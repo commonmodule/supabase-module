@@ -16,7 +16,10 @@ export default abstract class AuthTokenManager<
   }
 
   public set token(value: string | undefined) {
-    value ? this.store.set("token", value) : this.store.remove("token");
+    value
+      ? this.store.setPermanent("token", value)
+      : this.store.remove("token");
+
     this.emit(
       "tokenChanged",
       ...([value] as Parameters<
