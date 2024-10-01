@@ -1,14 +1,26 @@
-import { createClient, Provider, SupabaseClient } from "@supabase/supabase-js";
+import { Store } from "@common-module/app";
+import { EventContainer } from "@common-module/ts";
+import {
+  createClient,
+  Provider,
+  SupabaseClient,
+  User as SupabaseUser,
+} from "@supabase/supabase-js";
 import AuthTokenManager from "./AuthTokenManager.js";
 
-class SupabaseConnector {
+class SupabaseConnector extends EventContainer<{
+  sessionUserChanged: (user: SupabaseUser | undefined) => void;
+}> {
+  public isDevMode = false;
+
   private supabaseUrl: string | undefined;
   private supabaseKey: string | undefined;
 
   private _client: SupabaseClient | undefined;
   private authTokenManager: AuthTokenManager | undefined;
+  private store = new Store("supabase-connector");
 
-  public isDevMode = false;
+  private sessionUser: SupabaseUser | undefined;
 
   public init(
     supabaseUrl: string,
@@ -25,6 +37,9 @@ class SupabaseConnector {
 
     this.reconnect();
     authTokenManager?.on("tokenChanged", () => this.reconnect());
+
+    this.sessionUser = this.store.get<SupabaseUser>("sessionUser");
+    this.fetchSessionUser();
   }
 
   private reconnect() {
@@ -63,6 +78,37 @@ class SupabaseConnector {
         ? { redirectTo: window.location.origin, scopes: scopes?.join(" ") }
         : (scopes ? { scopes: scopes?.join(" ") } : undefined),
     });
+  }
+
+  private async fetchSessionUser() {
+    const { data, error } = await this.client.auth.getSession();
+    if (error) throw error;
+
+    const sessionUser = data?.session?.user;
+    if (sessionUser) {
+      this.store.setPermanent("sessionUser", sessionUser);
+      this.sessionUser = sessionUser;
+      this.emit("sessionUserChanged", sessionUser);
+    } else {
+      this.store.remove("sessionUser");
+      if (this.sessionUser) {
+        this.sessionUser = undefined;
+        this.emit("sessionUserChanged", undefined);
+      }
+    }
+  }
+
+  public async signOut() {
+    this.store.remove("sessionUser");
+    this.sessionUser = undefined;
+    this.emit("sessionUserChanged", undefined);
+
+    await this.client.auth.signOut();
+    await this.client.auth.refreshSession();
+  }
+
+  public get isSignedIn() {
+    return !!this.sessionUser;
   }
 
   public async callFunction(functionName: string, body?: Record<string, any>) {
