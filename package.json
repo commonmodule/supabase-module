@@ -2,12 +2,13 @@
   "name": "@common-module/supabase",
   "author": "yj.gaia",
   "homepage": "https://yj.dev",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "types": "./lib/index.d.ts",
   "main": "./lib/index.js",
   "dependencies": {
-    "@common-module/app": "^0.0.4"
+    "@common-module/app": "^0.1.0",
+    "@supabase/supabase-js": "^2.45.4"
   },
   "devDependencies": {}
 }
