@@ -39,7 +39,20 @@ class SupabaseConnector extends EventContainer<{
     authTokenManager?.on("tokenChanged", () => this.reconnect());
 
     this.sessionUser = this.store.get<SupabaseUser>("sessionUser");
-    this.fetchSessionUser();
+
+    this.client.auth.onAuthStateChange((_, session) => {
+      if (session?.user) {
+        this.store.setPermanent("sessionUser", session.user);
+        this.sessionUser = session.user;
+        this.emit("sessionUserChanged", session.user);
+      } else {
+        this.store.remove("sessionUser");
+        if (this.sessionUser) {
+          this.sessionUser = undefined;
+          this.emit("sessionUserChanged", undefined);
+        }
+      }
+    });
   }
 
   private reconnect() {
@@ -72,30 +85,13 @@ class SupabaseConnector extends EventContainer<{
   }
 
   public async signInWithOAuth(provider: Provider, scopes?: string[]) {
-    await this.client.auth.signInWithOAuth({
-      provider,
-      options: this.isDevMode
-        ? { redirectTo: window.location.origin, scopes: scopes?.join(" ") }
-        : (scopes ? { scopes: scopes?.join(" ") } : undefined),
-    });
-  }
-
-  private async fetchSessionUser() {
-    const { data, error } = await this.client.auth.getSession();
-    if (error) throw error;
-
-    const sessionUser = data?.session?.user;
-    if (sessionUser) {
-      this.store.setPermanent("sessionUser", sessionUser);
-      this.sessionUser = sessionUser;
-      this.emit("sessionUserChanged", sessionUser);
-    } else {
-      this.store.remove("sessionUser");
-      if (this.sessionUser) {
-        this.sessionUser = undefined;
-        this.emit("sessionUserChanged", undefined);
-      }
+    const options: any = {
+      scopes: scopes?.join(" "),
+    };
+    if (this.isDevMode) {
+      options.redirectTo = window.location.origin;
     }
+    await this.client.auth.signInWithOAuth({ provider, options });
   }
 
   public async signOut() {
@@ -104,7 +100,6 @@ class SupabaseConnector extends EventContainer<{
     this.emit("sessionUserChanged", undefined);
 
     await this.client.auth.signOut();
-    await this.client.auth.refreshSession();
   }
 
   public get isSignedIn() {

@@ -15,7 +15,6 @@ declare class SupabaseConnector extends EventContainer<{
     private reconnect;
     private get client();
     signInWithOAuth(provider: Provider, scopes?: string[]): Promise<void>;
-    private fetchSessionUser;
     signOut(): Promise<void>;
     get isSignedIn(): boolean;
     callFunction(functionName: string, body?: Record<string, any>): Promise<any>;
