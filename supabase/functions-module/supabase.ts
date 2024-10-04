@@ -43,3 +43,11 @@ export async function safeInsert<T>(
   const { error } = await supabase.from(tableName).insert(data);
   if (error) throw error;
 }
+
+export async function safeUpsert<T>(
+  tableName: string,
+  data: T,
+): Promise<void> {
+  const { error } = await supabase.from(tableName).upsert(data);
+  if (error) throw error;
+}
