@@ -36,6 +36,17 @@ export async function safeFetch<T>(
   return safeResult<T>(data);
 }
 
+export async function safeFetchSingle<T>(
+  tableName: string,
+  build: (
+    builder: PostgrestQueryBuilder<any, any, unknown>,
+  ) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>,
+) {
+  const { data, error } = await build(supabase.from(tableName));
+  if (error) throw error;
+  return safeResult<T>(data[0]);
+}
+
 export async function safeStore(
   tableName: string,
   build: (
