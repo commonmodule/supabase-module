@@ -36,18 +36,12 @@ export async function safeFetch<T>(
   return safeResult<T>(data);
 }
 
-export async function safeInsert<T>(
+export async function safeStore(
   tableName: string,
-  data: T,
-): Promise<void> {
-  const { error } = await supabase.from(tableName).insert(data);
-  if (error) throw error;
-}
-
-export async function safeUpsert<T>(
-  tableName: string,
-  data: T,
-): Promise<void> {
-  const { error } = await supabase.from(tableName).upsert(data);
+  build: (
+    builder: PostgrestQueryBuilder<any, any, unknown>,
+  ) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>,
+) {
+  const { error } = await build(supabase.from(tableName));
   if (error) throw error;
 }
