@@ -26,33 +26,33 @@ function safeResult<T>(data: T): T {
 }
 
 export async function safeFetch<T>(
-  tableName: string,
+  table: string,
   build: (
     builder: PostgrestQueryBuilder<any, any, unknown>,
   ) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>,
 ) {
-  const { data, error } = await build(supabase.from(tableName));
+  const { data, error } = await build(supabase.from(table));
   if (error) throw error;
   return safeResult<T>(data);
 }
 
 export async function safeFetchSingle<T>(
-  tableName: string,
+  table: string,
   build: (
     builder: PostgrestQueryBuilder<any, any, unknown>,
-  ) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>,
+  ) => PostgrestFilterBuilder<any, any, any, unknown>,
 ) {
-  const { data: [data], error } = await build(supabase.from(tableName));
+  const { data, error } = await build(supabase.from(table)).limit(1);
   if (error) throw error;
-  return data ? safeResult<T>(data) : undefined;
+  return data?.[0] ? safeResult<T>(data[0]) : undefined;
 }
 
 export async function safeStore(
-  tableName: string,
+  table: string,
   build: (
     builder: PostgrestQueryBuilder<any, any, unknown>,
   ) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>,
 ) {
-  const { error } = await build(supabase.from(tableName));
+  const { error } = await build(supabase.from(table));
   if (error) throw error;
 }

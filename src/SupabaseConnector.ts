@@ -1,6 +1,11 @@
 import { Store } from "@common-module/app";
 import { EventContainer } from "@common-module/ts";
 import {
+  PostgrestBuilder,
+  PostgrestFilterBuilder,
+  PostgrestQueryBuilder,
+} from "@supabase/postgrest-js";
+import {
   createClient,
   Provider,
   SupabaseClient,
@@ -112,6 +117,54 @@ class SupabaseConnector extends EventContainer<{
     });
     if (error) throw error;
     return data;
+  }
+
+  private convertNullToUndefined(obj: any) {
+    Object.keys(obj).forEach((key) => {
+      if (obj[key] === null) obj[key] = undefined;
+      else if (typeof obj[key] === "object" && obj[key] !== null) {
+        this.convertNullToUndefined(obj[key]);
+      }
+    });
+  }
+
+  private safeResult<T>(data: T): T {
+    if (Array.isArray(data)) {
+      data.forEach((obj) => this.convertNullToUndefined(obj));
+    } else this.convertNullToUndefined(data);
+    return data;
+  }
+
+  public async safeFetch<T>(
+    table: string,
+    build: (
+      builder: PostgrestQueryBuilder<any, any, unknown>,
+    ) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>,
+  ) {
+    const { data, error } = await build(this.client.from(table));
+    if (error) throw error;
+    return this.safeResult<T>(data);
+  }
+
+  public async safeFetchSingle<T>(
+    table: string,
+    build: (
+      builder: PostgrestQueryBuilder<any, any, unknown>,
+    ) => PostgrestFilterBuilder<any, any, any, unknown>,
+  ) {
+    const { data, error } = await build(this.client.from(table)).limit(1);
+    if (error) throw error;
+    return data?.[0] ? this.safeResult<T>(data[0]) : undefined;
+  }
+
+  public async safeStore(
+    table: string,
+    build: (
+      builder: PostgrestQueryBuilder<any, any, unknown>,
+    ) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>,
+  ) {
+    const { error } = await build(this.client.from(table));
+    if (error) throw error;
   }
 }
 
