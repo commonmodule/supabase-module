@@ -3,6 +3,7 @@ import {
   PostgrestBuilder,
   PostgrestFilterBuilder,
   PostgrestQueryBuilder,
+  PostgrestTransformBuilder,
 } from "https://esm.sh/v135/@supabase/postgrest-js@1.9.0/dist/module/index.js";
 
 const supabase = createClient(
@@ -40,7 +41,7 @@ export async function safeFetchSingle<T>(
   table: string,
   build: (
     builder: PostgrestQueryBuilder<any, any, unknown>,
-  ) => PostgrestFilterBuilder<any, any, any, unknown>,
+  ) => PostgrestTransformBuilder<any, any, any, unknown>,
 ) {
   const { data, error } = await build(supabase.from(table)).limit(1);
   if (error) throw error;

@@ -1,9 +1,11 @@
 import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
-export default class SupabaseService<T> {
+export default class SupabaseService<DT> {
     private table;
     private defaultQuery;
-    private defaultLimit;
-    constructor(table: string, defaultQuery: string, defaultLimit: number);
-    protected fetchSingle(build: (builder: PostgrestFilterBuilder<any, any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown>): Promise<T | undefined>;
+    constructor(table: string, defaultQuery: string);
+    protected fetch<T = DT>(build: (builder: PostgrestFilterBuilder<any, any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown>, query?: string): Promise<T[]>;
+    protected fetchSingle<T = DT>(build: (builder: PostgrestFilterBuilder<any, any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown>, query?: string): Promise<T | undefined>;
+    protected insert(data: Partial<DT>, query?: string): Promise<DT>;
+    protected delete(build: (builder: PostgrestFilterBuilder<any, any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown>): Promise<void>;
 }
 //# sourceMappingURL=SupabaseService.d.ts.map

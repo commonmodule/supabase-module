@@ -4,6 +4,7 @@ import {
   PostgrestBuilder,
   PostgrestFilterBuilder,
   PostgrestQueryBuilder,
+  PostgrestTransformBuilder,
 } from "@supabase/postgrest-js";
 import {
   createClient,
@@ -143,14 +144,14 @@ class SupabaseConnector extends EventContainer<{
   ) {
     const { data, error } = await build(this.client.from(table));
     if (error) throw error;
-    return this.safeResult<T>(data);
+    return this.safeResult<T[]>(data);
   }
 
   public async safeFetchSingle<T>(
     table: string,
     build: (
       builder: PostgrestQueryBuilder<any, any, unknown>,
-    ) => PostgrestFilterBuilder<any, any, any, unknown>,
+    ) => PostgrestTransformBuilder<any, any, any, unknown>,
   ) {
     const { data, error } = await build(this.client.from(table)).limit(1);
     if (error) throw error;

@@ -1,5 +1,5 @@
 import { EventContainer } from "@common-module/ts";
-import { PostgrestBuilder, PostgrestFilterBuilder, PostgrestQueryBuilder } from "@supabase/postgrest-js";
+import { PostgrestBuilder, PostgrestFilterBuilder, PostgrestQueryBuilder, PostgrestTransformBuilder } from "@supabase/postgrest-js";
 import { Provider, User as SupabaseUser } from "@supabase/supabase-js";
 import AuthTokenManager from "./AuthTokenManager.js";
 declare class SupabaseConnector extends EventContainer<{
@@ -21,8 +21,8 @@ declare class SupabaseConnector extends EventContainer<{
     callFunction(functionName: string, body?: Record<string, any>): Promise<any>;
     private convertNullToUndefined;
     private safeResult;
-    safeFetch<T>(table: string, build: (builder: PostgrestQueryBuilder<any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>): Promise<T>;
-    safeFetchSingle<T>(table: string, build: (builder: PostgrestQueryBuilder<any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown>): Promise<T | undefined>;
+    safeFetch<T>(table: string, build: (builder: PostgrestQueryBuilder<any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>): Promise<T[]>;
+    safeFetchSingle<T>(table: string, build: (builder: PostgrestQueryBuilder<any, any, unknown>) => PostgrestTransformBuilder<any, any, any, unknown>): Promise<T | undefined>;
     safeStore(table: string, build: (builder: PostgrestQueryBuilder<any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>): Promise<void>;
 }
 declare const _default: SupabaseConnector;
