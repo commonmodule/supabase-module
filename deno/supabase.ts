@@ -11,6 +11,17 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+export async function callFunction(
+  functionName: string,
+  body?: Record<string, any>,
+) {
+  const { data, error } = await supabase.functions.invoke(functionName, {
+    body,
+  });
+  if (error) throw error;
+  return data;
+}
+
 function convertNullToUndefined(obj: any) {
   Object.keys(obj).forEach((key) => {
     if (obj[key] === null) obj[key] = undefined;
