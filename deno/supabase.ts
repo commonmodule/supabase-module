@@ -17,7 +17,13 @@ export async function callDatabaseFunction<T>(
 ): Promise<T> {
   const { data, error } = await supabase.rpc(functionName, params);
   if (error) throw error;
-  return safeResult<T>(data);
+
+  // Only apply safeResult if data is an array or object
+  if (Array.isArray(data) || (typeof data === "object" && data !== null)) {
+    return safeResult<T>(data);
+  }
+
+  return data as T;
 }
 
 function convertNullToUndefined(obj: any) {
