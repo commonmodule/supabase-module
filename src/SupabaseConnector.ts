@@ -9,10 +9,12 @@ import {
 import {
   createClient,
   Provider,
+  RealtimeChannel,
   SupabaseClient,
   User as SupabaseUser,
 } from "@supabase/supabase-js";
 import AuthTokenManager from "./AuthTokenManager.js";
+import SubscribeToDataChangesOptions from "./SubscribeToDataChangesOptions.js";
 
 class SupabaseConnector extends EventContainer<{
   sessionUserChanged: (user: SupabaseUser | undefined) => void;
@@ -118,6 +120,29 @@ class SupabaseConnector extends EventContainer<{
     });
     if (error) throw error;
     return data;
+  }
+
+  public subscribeToDataChanges<T>(
+    options: SubscribeToDataChangesOptions<T>,
+  ): RealtimeChannel {
+    return this.client.channel(options.channel).on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: options.table,
+        filter: options.filter,
+      },
+      (payload) => {
+        if (payload.eventType === "INSERT") {
+          options.onInsert?.(payload.new as T);
+        } else if (payload.eventType === "UPDATE") {
+          options.onUpdate?.(payload.new as T);
+        } else if (payload.eventType === "DELETE") {
+          options.onDelete?.(payload.old as T);
+        }
+      },
+    );
   }
 
   private convertNullToUndefined(obj: any) {
