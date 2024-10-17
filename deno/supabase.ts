@@ -11,6 +11,18 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+export async function getSignedUser(req: Request) {
+  const userSupabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    {
+      global: { headers: { Authorization: req.headers.get("Authorization")! } },
+    },
+  );
+  const { data: { user } } = await userSupabase.auth.getUser();
+  return user ?? undefined;
+}
+
 export async function callDatabaseFunction<T>(
   functionName: string,
   params?: Record<string, any>,
