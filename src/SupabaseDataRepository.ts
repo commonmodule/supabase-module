@@ -1,7 +1,7 @@
 import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 import SupabaseConnector from "./SupabaseConnector.js";
 
-export default class SupabaseService<DT> {
+export default class SupabaseDataRepository<DT> {
   constructor(
     private table: string,
     private defaultQuery: string,

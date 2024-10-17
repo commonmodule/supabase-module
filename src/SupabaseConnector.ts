@@ -26,9 +26,9 @@ class SupabaseConnector extends EventContainer<{
 
   private _client: SupabaseClient | undefined;
   private authTokenManager: AuthTokenManager | undefined;
-  private store = new Store("supabase-connector");
 
-  private sessionUser: SupabaseUser | undefined;
+  private store = new Store("supabase-connector");
+  private sessionUser = this.store.get<SupabaseUser>("sessionUser");
 
   public init(
     supabaseUrl: string,
@@ -45,8 +45,6 @@ class SupabaseConnector extends EventContainer<{
 
     this.reconnect();
     authTokenManager?.on("tokenChanged", () => this.reconnect());
-
-    this.sessionUser = this.store.get<SupabaseUser>("sessionUser");
 
     this.client.auth.onAuthStateChange((_, session) => {
       if (session?.user) {
@@ -114,37 +112,6 @@ class SupabaseConnector extends EventContainer<{
     return !!this.sessionUser;
   }
 
-  public async callFunction(functionName: string, body?: Record<string, any>) {
-    const { data, error } = await this.client.functions.invoke(functionName, {
-      body,
-    });
-    if (error) throw error;
-    return data;
-  }
-
-  public subscribeToDataChanges<T>(
-    options: SubscribeToDataChangesOptions<T>,
-  ): RealtimeChannel {
-    return this.client.channel(options.channel).on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: options.table,
-        filter: options.filter,
-      },
-      (payload) => {
-        if (payload.eventType === "INSERT") {
-          options.onInsert?.(payload.new as T);
-        } else if (payload.eventType === "UPDATE") {
-          options.onUpdate?.(payload.new as T);
-        } else if (payload.eventType === "DELETE") {
-          options.onDelete?.(payload.old as T);
-        }
-      },
-    );
-  }
-
   private convertNullToUndefined(obj: any) {
     Object.keys(obj).forEach((key) => {
       if (obj[key] === null) obj[key] = undefined;
@@ -159,6 +126,26 @@ class SupabaseConnector extends EventContainer<{
       data.forEach((obj) => this.convertNullToUndefined(obj));
     } else this.convertNullToUndefined(data);
     return data;
+  }
+
+  public async callFunction<T>(
+    functionName: string,
+    body?: Record<string, any>,
+  ): Promise<T> {
+    const { data, error } = await this.client.functions.invoke(functionName, {
+      body,
+    });
+    if (error) throw error;
+    return this.safeResult<T>(data);
+  }
+
+  public async callDbFunction<T>(
+    functionName: string,
+    args?: Record<string, any>,
+  ): Promise<T> {
+    const { data, error } = await this.client.rpc(functionName, args);
+    if (error) throw error;
+    return this.safeResult<T>(data);
   }
 
   public async safeFetch<T>(
@@ -191,6 +178,29 @@ class SupabaseConnector extends EventContainer<{
   ) {
     const { error } = await build(this.client.from(table));
     if (error) throw error;
+  }
+
+  public subscribeToDataChanges<T>(
+    options: SubscribeToDataChangesOptions<T>,
+  ): RealtimeChannel {
+    return this.client.channel(options.channel).on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: options.table,
+        filter: options.filter,
+      },
+      (payload) => {
+        if (payload.eventType === "INSERT") {
+          options.onInsert?.(payload.new as T);
+        } else if (payload.eventType === "UPDATE") {
+          options.onUpdate?.(payload.new as T);
+        } else if (payload.eventType === "DELETE") {
+          options.onDelete?.(payload.old as T);
+        }
+      },
+    );
   }
 }
 

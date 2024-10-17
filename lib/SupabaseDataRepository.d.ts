@@ -8,4 +8,4 @@ export default class SupabaseDataRepository<DT> {
     protected insert(data: Partial<DT>, query?: string): Promise<DT>;
     protected delete(build: (builder: PostgrestFilterBuilder<any, any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown>): Promise<void>;
 }
-//# sourceMappingURL=SupabaseService.d.ts.map
+//# sourceMappingURL=SupabaseDataRepository.d.ts.map
