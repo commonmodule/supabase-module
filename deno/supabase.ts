@@ -6,18 +6,17 @@ import {
   PostgrestTransformBuilder,
 } from "https://esm.sh/v135/@supabase/postgrest-js@1.9.0/dist/module/index.js";
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-export async function getSignedUser(req: Request) {
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+export async function getSignedUser(authToken: string) {
   const userSupabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_ANON_KEY")!,
-    {
-      global: { headers: { Authorization: req.headers.get("Authorization")! } },
-    },
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+    { global: { headers: { Authorization: authToken } } },
   );
   const { data: { user } } = await userSupabase.auth.getUser();
   return user ?? undefined;

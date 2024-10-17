@@ -112,6 +112,10 @@ class SupabaseConnector extends EventContainer<{
     return !!this.sessionUser;
   }
 
+  public get signedUserId() {
+    return this.sessionUser?.id;
+  }
+
   private convertNullToUndefined(obj: any) {
     Object.keys(obj).forEach((key) => {
       if (obj[key] === null) obj[key] = undefined;
@@ -128,7 +132,7 @@ class SupabaseConnector extends EventContainer<{
     return data;
   }
 
-  public async callFunction<T>(
+  public async callEdgeFunction<T>(
     functionName: string,
     body?: Record<string, any>,
   ): Promise<T> {

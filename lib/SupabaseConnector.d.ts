@@ -19,9 +19,10 @@ declare class SupabaseConnector extends EventContainer<{
     signInWithOAuth(provider: Provider, scopes?: string[]): Promise<void>;
     signOut(): Promise<void>;
     get isSignedIn(): boolean;
+    get signedUserId(): string | undefined;
     private convertNullToUndefined;
     private safeResult;
-    callFunction<T>(functionName: string, body?: Record<string, any>): Promise<T>;
+    callEdgeFunction<T>(functionName: string, body?: Record<string, any>): Promise<T>;
     callDbFunction<T>(functionName: string, args?: Record<string, any>): Promise<T>;
     safeFetch<T>(table: string, build: (builder: PostgrestQueryBuilder<any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>): Promise<T[]>;
     safeFetchSingle<T>(table: string, build: (builder: PostgrestQueryBuilder<any, any, unknown>) => PostgrestTransformBuilder<any, any, any, unknown>): Promise<T | undefined>;
