@@ -1,5 +1,5 @@
 import { Store } from "@common-module/app";
-import { EventContainer } from "@common-module/ts";
+import { EventContainer, ObjectUtils } from "@common-module/ts";
 import {
   PostgrestBuilder,
   PostgrestFilterBuilder,
@@ -47,7 +47,10 @@ class SupabaseConnector extends EventContainer<{
     authTokenManager?.on("tokenChanged", () => this.reconnect());
 
     this.client.auth.onAuthStateChange((_, session) => {
-      if (session?.user) {
+      const newSessionUser = session?.user;
+      if (ObjectUtils.isEqual(newSessionUser, this.sessionUser)) return;
+
+      if (newSessionUser) {
         this.store.setPermanent("sessionUser", session.user);
         this.sessionUser = session.user;
         this.emit("sessionUserChanged", session.user);
