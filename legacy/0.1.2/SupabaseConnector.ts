@@ -15,24 +15,33 @@ import {
 } from "@supabase/supabase-js";
 import AuthTokenManager from "./AuthTokenManager.js";
 import SubscribeToDataChangesOptions from "./SubscribeToDataChangesOptions.js";
-import SupabaseUtils from "./SupabaseUtils.js";
 
-export default class SupabaseConnector extends EventContainer<{
+class SupabaseConnector extends EventContainer<{
   sessionUserChanged: (user: SupabaseUser | undefined) => void;
 }> {
-  private client!: SupabaseClient;
-  private store: Store<string>;
-  private sessionUser: SupabaseUser | undefined;
+  public isDevMode = false;
 
-  constructor(
-    private supabaseUrl: string,
-    private supabaseKey: string,
-    private authTokenManager?: AuthTokenManager,
+  private supabaseUrl: string | undefined;
+  private supabaseKey: string | undefined;
+
+  private _client: SupabaseClient | undefined;
+  private authTokenManager: AuthTokenManager | undefined;
+
+  private store = new Store("supabase-connector");
+  private sessionUser = this.store.get<SupabaseUser>("sessionUser");
+
+  public init(
+    supabaseUrl: string,
+    supabaseKey: string,
+    authTokenManager?: AuthTokenManager,
   ) {
-    super();
+    if (this.supabaseUrl) {
+      throw new Error("SupabaseConnector already initialized");
+    }
 
-    this.store = new Store(`supabase-connector-${supabaseUrl}` as any);
-    this.sessionUser = this.store.get<SupabaseUser>("sessionUser");
+    this.supabaseUrl = supabaseUrl;
+    this.supabaseKey = supabaseKey;
+    this.authTokenManager = authTokenManager;
 
     this.reconnect();
     authTokenManager?.on("tokenChanged", () => this.reconnect());
@@ -56,8 +65,13 @@ export default class SupabaseConnector extends EventContainer<{
   }
 
   private reconnect() {
-    this.client?.removeAllChannels();
-    this.client = createClient(this.supabaseUrl, this.supabaseKey, {
+    this._client?.removeAllChannels();
+
+    if (!this.supabaseUrl || !this.supabaseKey) {
+      throw new Error("SupabaseConnector not initialized");
+    }
+
+    this._client = createClient(this.supabaseUrl, this.supabaseKey, {
       auth: {
         autoRefreshToken: true,
         persistSession: true,
@@ -74,14 +88,19 @@ export default class SupabaseConnector extends EventContainer<{
     });
   }
 
+  private get client() {
+    if (!this._client) throw new Error("SupabaseConnector not initialized");
+    return this._client;
+  }
+
   public async signInWithOAuth(provider: Provider, scopes?: string[]) {
-    await this.client.auth.signInWithOAuth({
-      provider,
-      options: {
-        scopes: scopes?.join(" "),
-        redirectTo: window.location.origin,
-      },
-    });
+    const options: any = {
+      scopes: scopes?.join(" "),
+    };
+    if (this.isDevMode) {
+      options.redirectTo = window.location.origin;
+    }
+    await this.client.auth.signInWithOAuth({ provider, options });
   }
 
   public async signOut() {
@@ -100,6 +119,22 @@ export default class SupabaseConnector extends EventContainer<{
     return this.sessionUser?.id;
   }
 
+  private convertNullToUndefined(obj: any) {
+    Object.keys(obj).forEach((key) => {
+      if (obj[key] === null) obj[key] = undefined;
+      else if (typeof obj[key] === "object" && obj[key] !== null) {
+        this.convertNullToUndefined(obj[key]);
+      }
+    });
+  }
+
+  private safeResult<T>(data: T): T {
+    if (Array.isArray(data)) {
+      data.forEach((obj) => this.convertNullToUndefined(obj));
+    } else this.convertNullToUndefined(data);
+    return data;
+  }
+
   public async callEdgeFunction<T>(
     functionName: string,
     body?: Record<string, any>,
@@ -108,7 +143,7 @@ export default class SupabaseConnector extends EventContainer<{
       body,
     });
     if (error) throw error;
-    return SupabaseUtils.safeResult<T>(data);
+    return this.safeResult<T>(data);
   }
 
   public async callDbFunction<T>(
@@ -117,7 +152,7 @@ export default class SupabaseConnector extends EventContainer<{
   ): Promise<T> {
     const { data, error } = await this.client.rpc(functionName, args);
     if (error) throw error;
-    return SupabaseUtils.safeResult<T>(data);
+    return this.safeResult<T>(data);
   }
 
   public async safeFetch<T>(
@@ -128,7 +163,7 @@ export default class SupabaseConnector extends EventContainer<{
   ) {
     const { data, error } = await build(this.client.from(table));
     if (error) throw error;
-    return SupabaseUtils.safeResult<T[]>(data);
+    return this.safeResult<T[]>(data);
   }
 
   public async safeFetchSingle<T>(
@@ -139,7 +174,7 @@ export default class SupabaseConnector extends EventContainer<{
   ) {
     const { data, error } = await build(this.client.from(table)).limit(1);
     if (error) throw error;
-    return data?.[0] ? SupabaseUtils.safeResult<T>(data[0]) : undefined;
+    return data?.[0] ? this.safeResult<T>(data[0]) : undefined;
   }
 
   public async safeStore(
@@ -175,3 +210,5 @@ export default class SupabaseConnector extends EventContainer<{
     );
   }
 }
+
+export default new SupabaseConnector();

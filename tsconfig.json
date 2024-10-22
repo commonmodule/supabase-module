@@ -74,7 +74,7 @@
     "test",
     "supabase",
     "service-worker",
-    "legacy-versions",
+    "legacy",
     "deno"
   ]
 }

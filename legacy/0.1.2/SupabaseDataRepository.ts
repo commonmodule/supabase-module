@@ -3,7 +3,6 @@ import SupabaseConnector from "./SupabaseConnector.js";
 
 export default class SupabaseDataRepository<DT> {
   constructor(
-    private connector: SupabaseConnector,
     private table: string,
     private defaultQuery: string,
   ) {}
@@ -14,7 +13,7 @@ export default class SupabaseDataRepository<DT> {
     ) => PostgrestFilterBuilder<any, any, any, unknown>,
     query = this.defaultQuery,
   ) {
-    return await this.connector.safeFetch<T>(
+    return await SupabaseConnector.safeFetch<T>(
       this.table,
       (b) => build(b.select(query)),
     );
@@ -26,7 +25,7 @@ export default class SupabaseDataRepository<DT> {
     ) => PostgrestFilterBuilder<any, any, any, unknown>,
     query = this.defaultQuery,
   ) {
-    return await this.connector.safeFetchSingle<T>(
+    return await SupabaseConnector.safeFetchSingle<T>(
       this.table,
       (b) => build(b.select(query)),
     );
@@ -36,7 +35,7 @@ export default class SupabaseDataRepository<DT> {
     data: Partial<DT>,
     query = this.defaultQuery,
   ): Promise<DT> {
-    return (await this.connector.safeFetchSingle<DT>(
+    return (await SupabaseConnector.safeFetchSingle<DT>(
       this.table,
       (b) => b.insert(data).select(query),
     ))!;
@@ -47,7 +46,7 @@ export default class SupabaseDataRepository<DT> {
       builder: PostgrestFilterBuilder<any, any, any, unknown>,
     ) => PostgrestFilterBuilder<any, any, any, unknown>,
   ) {
-    return await this.connector.safeStore(
+    return await SupabaseConnector.safeStore(
       this.table,
       (b) => build(b.delete()),
     );
