@@ -31,7 +31,10 @@ export default class SupabaseConnector extends EventContainer<{
   ) {
     super();
 
-    this.store = new Store(`supabase-connector-${supabaseUrl}` as any);
+    const supabaseId = new URL(supabaseUrl).hostname.split(".")[0] as Lowercase<
+      string
+    >;
+    this.store = new Store(`supabase-connector-${supabaseId}`);
     this.sessionUser = this.store.get<SupabaseUser>("sessionUser");
 
     this.reconnect();
