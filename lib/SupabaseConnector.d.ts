@@ -24,5 +24,6 @@ export default class SupabaseConnector extends EventContainer<{
     safeFetchSingle<T>(table: string, build: (builder: PostgrestQueryBuilder<any, any, unknown>) => PostgrestTransformBuilder<any, any, any, unknown>): Promise<T | undefined>;
     safeStore(table: string, build: (builder: PostgrestQueryBuilder<any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>): Promise<void>;
     subscribeToDataChanges<T>(options: SubscribeToDataChangesOptions<T>): RealtimeChannel;
+    uploadPublicFile(bucket: string, path: string, file: File): Promise<string>;
 }
 //# sourceMappingURL=SupabaseConnector.d.ts.map

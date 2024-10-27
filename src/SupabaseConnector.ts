@@ -13,6 +13,7 @@ import {
   SupabaseClient,
   User as SupabaseUser,
 } from "@supabase/supabase-js";
+import { v4 as uuidv4 } from "uuid";
 import AuthTokenManager from "./AuthTokenManager.js";
 import SubscribeToDataChangesOptions from "./SubscribeToDataChangesOptions.js";
 import SupabaseUtils from "./SupabaseUtils.js";
@@ -176,5 +177,26 @@ export default class SupabaseConnector extends EventContainer<{
         }
       },
     );
+  }
+
+  public async uploadPublicFile(
+    bucket: string,
+    path: string,
+    file: File,
+  ): Promise<string> {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${uuidv4()}.${fileExt}`;
+    const filePath = `${path}/${fileName}`;
+
+    const { error: uploadError } = await this.client.storage
+      .from(bucket)
+      .upload(filePath, file, { cacheControl: "31536000" });
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = this.client.storage
+      .from(bucket)
+      .getPublicUrl(filePath);
+
+    return publicUrl;
   }
 }
