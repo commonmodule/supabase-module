@@ -106,7 +106,7 @@ export default class SupabaseConnector extends EventContainer<{
 
   public async callEdgeFunction<T>(
     functionName: string,
-    body?: Record<string, any>,
+    body?: Record<string, any> | FormData,
   ): Promise<T> {
     const { data, error } = await this.client.functions.invoke(functionName, {
       body,
