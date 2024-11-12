@@ -18,7 +18,7 @@ export default class SupabaseConnector extends EventContainer<{
     signOut(): Promise<void>;
     get isSignedIn(): boolean;
     get signedUserId(): string | undefined;
-    callEdgeFunction<T>(functionName: string, body?: Record<string, any>): Promise<T>;
+    callEdgeFunction<T>(functionName: string, body?: Record<string, any> | FormData): Promise<T>;
     callDbFunction<T>(functionName: string, args?: Record<string, any>): Promise<T>;
     safeFetch<T>(table: string, build: (builder: PostgrestQueryBuilder<any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>): Promise<T[]>;
     safeFetchSingle<T>(table: string, build: (builder: PostgrestQueryBuilder<any, any, unknown>) => PostgrestTransformBuilder<any, any, any, unknown>): Promise<T | undefined>;
