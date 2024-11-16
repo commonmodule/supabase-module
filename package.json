@@ -2,7 +2,7 @@
   "name": "@common-module/supabase",
   "author": "yj.gaia",
   "homepage": "https://yj.dev",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "type": "module",
   "types": "./lib/index.d.ts",
   "main": "./lib/index.js",

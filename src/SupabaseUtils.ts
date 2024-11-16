@@ -11,7 +11,9 @@ class SupabaseUtils {
   public safeResult<T>(data: T): T {
     if (Array.isArray(data)) {
       data.forEach((obj) => this.convertNullToUndefined(obj));
-    } else this.convertNullToUndefined(data);
+    } else if (typeof data === "object") {
+      this.convertNullToUndefined(data);
+    }
     return data;
   }
 }

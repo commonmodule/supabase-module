@@ -104,6 +104,20 @@ export default class SupabaseConnector extends EventContainer<{
     return this.sessionUser?.id;
   }
 
+  private async checkInvalidJwtError(error: any) {
+    if (this.authTokenManager && error.context?.body) {
+      try {
+        const response = new Response(error.context.body);
+        const result = await response.json();
+        if (result.code === 401 && result.message === "Invalid JWT") {
+          this.authTokenManager.token = undefined;
+        }
+      } catch (e) {
+        console.error("Error parsing response body", e);
+      }
+    }
+  }
+
   public async callEdgeFunction<T>(
     functionName: string,
     body?: Record<string, any> | FormData,
@@ -111,7 +125,10 @@ export default class SupabaseConnector extends EventContainer<{
     const { data, error } = await this.client.functions.invoke(functionName, {
       body,
     });
-    if (error) throw error;
+    if (error) {
+      await this.checkInvalidJwtError(error);
+      throw error;
+    }
     return SupabaseUtils.safeResult<T>(data);
   }
 
@@ -120,7 +137,10 @@ export default class SupabaseConnector extends EventContainer<{
     args?: Record<string, any>,
   ): Promise<T> {
     const { data, error } = await this.client.rpc(functionName, args);
-    if (error) throw error;
+    if (error) {
+      await this.checkInvalidJwtError(error);
+      throw error;
+    }
     return SupabaseUtils.safeResult<T>(data);
   }
 
@@ -131,7 +151,10 @@ export default class SupabaseConnector extends EventContainer<{
     ) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>,
   ) {
     const { data, error } = await build(this.client.from(table));
-    if (error) throw error;
+    if (error) {
+      await this.checkInvalidJwtError(error);
+      throw error;
+    }
     return SupabaseUtils.safeResult<T[]>(data);
   }
 
@@ -142,7 +165,10 @@ export default class SupabaseConnector extends EventContainer<{
     ) => PostgrestTransformBuilder<any, any, any, unknown>,
   ) {
     const { data, error } = await build(this.client.from(table)).limit(1);
-    if (error) throw error;
+    if (error) {
+      await this.checkInvalidJwtError(error);
+      throw error;
+    }
     return data?.[0] ? SupabaseUtils.safeResult<T>(data[0]) : undefined;
   }
 
@@ -153,7 +179,10 @@ export default class SupabaseConnector extends EventContainer<{
     ) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>,
   ) {
     const { error } = await build(this.client.from(table));
-    if (error) throw error;
+    if (error) {
+      await this.checkInvalidJwtError(error);
+      throw error;
+    }
   }
 
   public subscribeToDataChanges<T>(
@@ -194,7 +223,11 @@ export default class SupabaseConnector extends EventContainer<{
         cacheControl: "31536000",
         contentType: file.type,
       });
-    if (uploadError) throw uploadError;
+
+    if (uploadError) {
+      await this.checkInvalidJwtError(uploadError);
+      throw uploadError;
+    }
 
     const { data: { publicUrl } } = this.client.storage
       .from(bucket)
