@@ -1,7 +1,7 @@
 {
   "name": "@common-module/supabase",
   "author": "yj.gaia",
-  "homepage": "https://yj.dev",
+  "homepage": "https://personas.gaia.cc/yj.gaia",
   "version": "0.1.7",
   "type": "module",
   "types": "./lib/index.d.ts",
