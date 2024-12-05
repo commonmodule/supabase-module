@@ -164,12 +164,13 @@ export default class SupabaseConnector extends EventContainer<{
       builder: PostgrestQueryBuilder<any, any, unknown>,
     ) => PostgrestTransformBuilder<any, any, any, unknown>,
   ) {
-    const { data, error } = await build(this.client.from(table)).limit(1);
+    const { data, error } = await build(this.client.from(table))
+      .maybeSingle<T>();
     if (error) {
       await this.checkInvalidJwtError(error);
       throw error;
     }
-    return data?.[0] ? SupabaseUtils.safeResult<T>(data[0]) : undefined;
+    return data ? SupabaseUtils.safeResult<T>(data) : undefined;
   }
 
   public async safeStore(
