@@ -2,12 +2,12 @@ import { Store } from "@common-module/app";
 import { EventContainer, KebabCase } from "@common-module/ts";
 
 export default class AuthTokenManager<
-  ET extends Record<string, (...args: any[]) => any> = Record<
+  E extends Record<string, (...args: any[]) => any> = Record<
     string,
     (...args: any[]) => any
   >,
 > extends EventContainer<
-  ET & { tokenChanged: (token: string | undefined) => void }
+  E & { tokenChanged: (token: string | undefined) => void }
 > {
   protected store: Store<string>;
 
@@ -28,7 +28,7 @@ export default class AuthTokenManager<
     this.emit(
       "tokenChanged",
       ...([value] as Parameters<
-        (ET & { tokenChanged: (token: string | undefined) => void })[
+        (E & { tokenChanged: (token: string | undefined) => void })[
           "tokenChanged"
         ]
       >),
