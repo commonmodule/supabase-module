@@ -206,7 +206,7 @@ export default class SupabaseConnector extends EventContainer<{
           options.onDelete?.(payload.old as T);
         }
       },
-    );
+    ).subscribe();
   }
 
   public async uploadPublicFile(

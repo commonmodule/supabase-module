@@ -1,6 +1,6 @@
 import { Store } from "@common-module/app";
 import { EventContainer } from "@common-module/ts";
-export default class AuthTokenManager<ET extends Record<string, (...args: any[]) => any> = Record<string, (...args: any[]) => any>> extends EventContainer<ET & {
+export default class AuthTokenManager<E extends Record<string, (...args: any[]) => any> = Record<string, (...args: any[]) => any>> extends EventContainer<E & {
     tokenChanged: (token: string | undefined) => void;
 }> {
     protected store: Store<string>;
