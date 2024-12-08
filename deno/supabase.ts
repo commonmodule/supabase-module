@@ -83,3 +83,14 @@ export async function safeStore(
   const { error } = await build(supabase.from(table));
   if (error) throw error;
 }
+
+export async function insert<DT>(
+  table: string,
+  data: Partial<DT>,
+  query: string,
+): Promise<DT> {
+  return (await safeFetchSingle<DT>(
+    table,
+    (b) => b.insert(data).select(query),
+  ))!;
+}
