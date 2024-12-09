@@ -40,6 +40,26 @@ export default class SupabaseConnector extends EventContainer<{
 
     this.reconnect();
     authTokenManager?.on("tokenChanged", () => this.reconnect());
+  }
+
+  private reconnect() {
+    this.client?.removeAllChannels();
+
+    this.client = createClient(this.supabaseUrl, this.supabaseKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+      },
+      ...(this.authTokenManager?.token
+        ? {
+          global: {
+            headers: {
+              Authorization: `Bearer ${this.authTokenManager.token}`,
+            },
+          },
+        }
+        : {}),
+    });
 
     this.client.auth.onAuthStateChange((_, session) => {
       const newSessionUser = session?.user;
@@ -56,25 +76,6 @@ export default class SupabaseConnector extends EventContainer<{
           this.emit("sessionUserChanged", undefined);
         }
       }
-    });
-  }
-
-  private reconnect() {
-    this.client?.removeAllChannels();
-    this.client = createClient(this.supabaseUrl, this.supabaseKey, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-      },
-      ...(this.authTokenManager?.token
-        ? {
-          global: {
-            headers: {
-              Authorization: `Bearer ${this.authTokenManager.token}`,
-            },
-          },
-        }
-        : {}),
     });
   }
 
@@ -206,7 +207,11 @@ export default class SupabaseConnector extends EventContainer<{
           options.onDelete?.(payload.old as T);
         }
       },
-    ).subscribe();
+    ).subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        options.onSubscribe();
+      }
+    });
   }
 
   public async uploadPublicFile(
