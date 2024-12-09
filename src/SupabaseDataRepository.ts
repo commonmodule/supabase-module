@@ -52,6 +52,16 @@ export default class SupabaseDataRepository<DT> {
     ))!;
   }
 
+  protected async update(
+    data: Partial<DT>,
+    query = this.defaultQuery,
+  ): Promise<DT> {
+    return (await this.supabaseConnector.safeFetchSingle<DT>(
+      this.table,
+      (b) => b.update(data).select(query),
+    ))!;
+  }
+
   protected async delete(
     build: (
       builder: PostgrestFilterBuilder<any, any, any, unknown>,
