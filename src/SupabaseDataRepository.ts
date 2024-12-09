@@ -42,7 +42,7 @@ export default class SupabaseDataRepository<DT> {
     );
   }
 
-  protected async insert(
+  protected async safeInsert(
     data: Partial<DT>,
     query = this.defaultQuery,
   ): Promise<DT> {
@@ -52,13 +52,16 @@ export default class SupabaseDataRepository<DT> {
     ))!;
   }
 
-  protected async update(
+  protected async safeUpdate(
+    build: (
+      builder: PostgrestFilterBuilder<any, any, any, unknown>,
+    ) => PostgrestFilterBuilder<any, any, any, unknown>,
     data: Partial<DT>,
     query = this.defaultQuery,
   ): Promise<DT> {
     return (await this.supabaseConnector.safeFetchSingle<DT>(
       this.table,
-      (b) => b.update(data).select(query),
+      (b) => build(b.update(data)).select(query),
     ))!;
   }
 
