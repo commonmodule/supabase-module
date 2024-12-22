@@ -1,0 +1,1 @@
+{"version":3,"file":"SubscribeToBroadcastOptions.d.ts","sourceRoot":"","sources":["../src/SubscribeToBroadcastOptions.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,OAAO,WAAW,2BAA2B,CAClD,CAAC,SAAS;IAAE,CAAC,GAAG,EAAE,MAAM,GAAG,GAAG,CAAA;CAAE;IAEhC,OAAO,EAAE,MAAM,CAAC;IAChB,SAAS,EAAE;SACR,KAAK,IAAI,MAAM,GAAG,CAAC,OAAO,EAAE,CAAC,KAAK,IAAI;KACxC,CAAC;CACH"}

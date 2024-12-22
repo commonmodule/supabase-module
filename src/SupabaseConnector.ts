@@ -15,6 +15,7 @@ import {
 } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
 import AuthTokenManager from "./AuthTokenManager.js";
+import SubscribeToBroadcastOptions from "./SubscribeToBroadcastOptions.js";
 import SubscribeToDataChangesOptions from "./SubscribeToDataChangesOptions.js";
 import SubscribeToPresenceOptions from "./SubscribeToPresenceOptions.js";
 import SupabaseUtils from "./SupabaseUtils.js";
@@ -188,32 +189,18 @@ export default class SupabaseConnector extends EventContainer<{
     }
   }
 
-  public subscribeToDataChanges<T extends { [key: string]: any }>(
-    options: SubscribeToDataChangesOptions<T>,
-  ): RealtimeChannel {
-    return this.client.channel(options.channel).on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: options.table,
-        filter: options.filter,
-      },
-      (payload) => {
-        if (payload.eventType === "INSERT") {
-          options.onInsert?.(payload.new as T);
-        } else if (payload.eventType === "UPDATE") {
-          options.onUpdate?.(payload.new as T);
-        } else if (payload.eventType === "DELETE") {
-          options.onDelete?.(payload.old as T);
-        }
-      },
-    ).subscribe((status, error) => {
-      if (status === "SUBSCRIBED") {
-        options.onSubscribe();
-      }
-      if (error) console.error(error);
-    });
+  public subscribeToBroadcast<T extends { [key: string]: any }>(
+    options: SubscribeToBroadcastOptions<T>,
+  ) {
+    const channel = this.client.channel(options.channel);
+
+    for (const [event, listener] of Object.entries(options.listeners)) {
+      channel.on<T>("broadcast", { event }, (p) => listener(p.payload));
+    }
+
+    channel.subscribe();
+
+    return channel;
   }
 
   public subscribeToPresence<T extends { [key: string]: any }>(
@@ -252,6 +239,34 @@ export default class SupabaseConnector extends EventContainer<{
     });
 
     return channel;
+  }
+
+  public subscribeToDataChanges<T extends { [key: string]: any }>(
+    options: SubscribeToDataChangesOptions<T>,
+  ): RealtimeChannel {
+    return this.client.channel(options.channel).on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: options.table,
+        filter: options.filter,
+      },
+      (payload) => {
+        if (payload.eventType === "INSERT") {
+          options.onInsert?.(payload.new as T);
+        } else if (payload.eventType === "UPDATE") {
+          options.onUpdate?.(payload.new as T);
+        } else if (payload.eventType === "DELETE") {
+          options.onDelete?.(payload.old as T);
+        }
+      },
+    ).subscribe((status, error) => {
+      if (status === "SUBSCRIBED") {
+        options.onSubscribe();
+      }
+      if (error) console.error(error);
+    });
   }
 
   public async uploadPublicFile(
