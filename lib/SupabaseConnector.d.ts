@@ -3,6 +3,7 @@ import { PostgrestBuilder, PostgrestFilterBuilder, PostgrestQueryBuilder, Postgr
 import { Provider, RealtimeChannel, User as SupabaseUser } from "@supabase/supabase-js";
 import AuthTokenManager from "./AuthTokenManager.js";
 import SubscribeToDataChangesOptions from "./SubscribeToDataChangesOptions.js";
+import SubscribeToPresenceOptions from "./SubscribeToPresenceOptions.js";
 export default class SupabaseConnector extends EventContainer<{
     sessionUserChanged: (user: SupabaseUser | undefined) => void;
 }> {
@@ -24,7 +25,12 @@ export default class SupabaseConnector extends EventContainer<{
     safeFetch<T>(table: string, build: (builder: PostgrestQueryBuilder<any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>): Promise<T[]>;
     safeFetchSingle<T>(table: string, build: (builder: PostgrestQueryBuilder<any, any, unknown>) => PostgrestTransformBuilder<any, any, any, unknown>): Promise<T | undefined>;
     safeStore(table: string, build: (builder: PostgrestQueryBuilder<any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown> | PostgrestBuilder<any>): Promise<void>;
-    subscribeToDataChanges<T>(options: SubscribeToDataChangesOptions<T>): RealtimeChannel;
+    subscribeToDataChanges<T extends {
+        [key: string]: any;
+    }>(options: SubscribeToDataChangesOptions<T>): RealtimeChannel;
+    subscribeToPresence<T extends {
+        [key: string]: any;
+    }>(options: SubscribeToPresenceOptions<T>): RealtimeChannel;
     uploadPublicFile(bucket: string, path: string, file: File): Promise<string>;
 }
 //# sourceMappingURL=SupabaseConnector.d.ts.map

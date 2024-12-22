@@ -16,6 +16,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import AuthTokenManager from "./AuthTokenManager.js";
 import SubscribeToDataChangesOptions from "./SubscribeToDataChangesOptions.js";
+import SubscribeToPresenceOptions from "./SubscribeToPresenceOptions.js";
 import SupabaseUtils from "./SupabaseUtils.js";
 
 export default class SupabaseConnector extends EventContainer<{
@@ -187,7 +188,7 @@ export default class SupabaseConnector extends EventContainer<{
     }
   }
 
-  public subscribeToDataChanges<T>(
+  public subscribeToDataChanges<T extends { [key: string]: any }>(
     options: SubscribeToDataChangesOptions<T>,
   ): RealtimeChannel {
     return this.client.channel(options.channel).on(
@@ -212,6 +213,35 @@ export default class SupabaseConnector extends EventContainer<{
         options.onSubscribe();
       }
     });
+  }
+
+  public subscribeToPresence<T extends { [key: string]: any }>(
+    options: SubscribeToPresenceOptions<T>,
+  ) {
+    const channel = this.client.channel(options.channel);
+    channel.on(
+      "presence",
+      { event: "sync" },
+      () => options.onSync(channel.presenceState()),
+    );
+
+    if (options.onJoin) {
+      channel.on<T>(
+        "presence",
+        { event: "join" },
+        ({ key, newPresences }) => options.onJoin!(key, newPresences),
+      );
+    }
+
+    if (options.onLeave) {
+      channel.on<T>(
+        "presence",
+        { event: "leave" },
+        ({ key, leftPresences }) => options.onLeave!(key, leftPresences),
+      );
+    }
+
+    return channel.subscribe();
   }
 
   public async uploadPublicFile(
