@@ -208,17 +208,20 @@ export default class SupabaseConnector extends EventContainer<{
           options.onDelete?.(payload.old as T);
         }
       },
-    ).subscribe((status) => {
+    ).subscribe((status, error) => {
       if (status === "SUBSCRIBED") {
         options.onSubscribe();
       }
+      if (error) console.error(error);
     });
   }
 
   public subscribeToPresence<T extends { [key: string]: any }>(
     options: SubscribeToPresenceOptions<T>,
+    initialState: T,
   ) {
     const channel = this.client.channel(options.channel);
+
     channel.on(
       "presence",
       { event: "sync" },
@@ -241,7 +244,14 @@ export default class SupabaseConnector extends EventContainer<{
       );
     }
 
-    return channel.subscribe();
+    channel.subscribe(async (status, error) => {
+      if (status === "SUBSCRIBED") {
+        await channel.track(initialState);
+      }
+      if (error) console.error(error);
+    });
+
+    return channel;
   }
 
   public async uploadPublicFile(
