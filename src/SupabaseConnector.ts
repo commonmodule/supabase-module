@@ -15,7 +15,6 @@ import {
 } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
 import AuthTokenManager from "./AuthTokenManager.js";
-import SubscribeToBroadcastOptions from "./SubscribeToBroadcastOptions.js";
 import SubscribeToDataChangesOptions from "./SubscribeToDataChangesOptions.js";
 import SubscribeToPresenceOptions from "./SubscribeToPresenceOptions.js";
 import SupabaseUtils from "./SupabaseUtils.js";
@@ -189,13 +188,14 @@ export default class SupabaseConnector extends EventContainer<{
     }
   }
 
-  public subscribeToBroadcast<T extends { [key: string]: any }>(
-    options: SubscribeToBroadcastOptions<T>,
+  public subscribeToBroadcast(
+    channelName: string,
+    listeners: { [event: string]: (message: any) => void },
   ) {
-    const channel = this.client.channel(options.channel);
+    const channel = this.client.channel(channelName);
 
-    for (const [event, listener] of Object.entries(options.listeners)) {
-      channel.on<T>("broadcast", { event }, (p) => listener(p.payload));
+    for (const [event, listener] of Object.entries(listeners)) {
+      channel.on("broadcast", { event }, (p) => listener(p.payload));
     }
 
     channel.subscribe();
@@ -204,10 +204,11 @@ export default class SupabaseConnector extends EventContainer<{
   }
 
   public subscribeToPresence<T extends { [key: string]: any }>(
+    channelName: string,
     options: SubscribeToPresenceOptions<T>,
     initialState: T,
   ) {
-    const channel = this.client.channel(options.channel);
+    const channel = this.client.channel(channelName);
 
     channel.on(
       "presence",
@@ -242,9 +243,10 @@ export default class SupabaseConnector extends EventContainer<{
   }
 
   public subscribeToDataChanges<T extends { [key: string]: any }>(
+    channelName: string,
     options: SubscribeToDataChangesOptions<T>,
   ): RealtimeChannel {
-    return this.client.channel(options.channel).on(
+    return this.client.channel(channelName).on(
       "postgres_changes",
       {
         event: "*",

@@ -7,7 +7,6 @@ type Presence<T extends {
 export default interface SubscribeToPresenceOptions<T extends {
     [key: string]: any;
 }> {
-    channel: string;
     onSync: (state: RealtimePresenceState<T>) => void;
     onJoin?: (key: string, newPresences: Presence<T>[]) => void;
     onLeave?: (key: string, leftPresences: Presence<T>[]) => void;

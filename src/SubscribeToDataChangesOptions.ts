@@ -1,7 +1,6 @@
 export default interface SubscribeToDataChangesOptions<
   T extends { [key: string]: any },
 > {
-  channel: string;
   table: string;
   filter?: string;
   onSubscribe: () => void;
