@@ -236,7 +236,7 @@ export default class SupabaseConnector extends EventContainer<{
       if (status === "SUBSCRIBED") {
         await channel.track(initialState);
       }
-      if (error) console.error(error);
+      if (error) console.error(status, error);
     });
 
     return channel;
@@ -267,7 +267,7 @@ export default class SupabaseConnector extends EventContainer<{
       if (status === "SUBSCRIBED") {
         options.onSubscribe();
       }
-      if (error) console.error(error);
+      if (error) console.error(status, error);
     });
   }
 
