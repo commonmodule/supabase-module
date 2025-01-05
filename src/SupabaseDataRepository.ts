@@ -52,6 +52,13 @@ export default class SupabaseDataRepository<DT> {
     ))!;
   }
 
+  protected async safeUpsert(data: Partial<DT>) {
+    return await this.supabaseConnector.safeStore(
+      this.table,
+      (b) => b.upsert(data),
+    );
+  }
+
   protected async safeUpdate(
     build: (
       builder: PostgrestFilterBuilder<any, any, any, unknown>,
@@ -70,7 +77,7 @@ export default class SupabaseDataRepository<DT> {
       builder: PostgrestFilterBuilder<any, any, any, unknown>,
     ) => PostgrestFilterBuilder<any, any, any, unknown>,
   ) {
-    return await this.supabaseConnector.safeStore(
+    await this.supabaseConnector.safeStore(
       this.table,
       (b) => build(b.delete()),
     );
