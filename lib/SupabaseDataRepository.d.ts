@@ -10,6 +10,7 @@ export default class SupabaseDataRepository<DT> {
     protected fetch<T = DT>(build: (builder: PostgrestFilterBuilder<any, any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown>, query?: string): Promise<T[]>;
     protected fetchSingle<T = DT>(build: (builder: PostgrestFilterBuilder<any, any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown>, query?: string): Promise<T | undefined>;
     protected safeInsert(data: Partial<DT>, query?: string): Promise<DT>;
+    protected safeUpsert(data: Partial<DT>): Promise<void>;
     protected safeUpdate(build: (builder: PostgrestFilterBuilder<any, any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown>, data: Partial<DT>, query?: string): Promise<DT>;
     protected delete(build: (builder: PostgrestFilterBuilder<any, any, any, unknown>) => PostgrestFilterBuilder<any, any, any, unknown>): Promise<void>;
 }
