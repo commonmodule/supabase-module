@@ -107,15 +107,24 @@ export default class SupabaseConnector extends EventContainer<{
   }
 
   private async checkInvalidJwtError(error: any) {
-    if (this.authTokenManager && error.context?.body) {
-      try {
-        const response = new Response(error.context.body);
-        const result = await response.json();
-        if (result.code === 401 && result.message === "Invalid JWT") {
-          this.authTokenManager.token = undefined;
+    if (this.authTokenManager) {
+      if (error.context?.body) {
+        try {
+          const response = new Response(error.context.body);
+          const result = await response.json();
+          if (result.code === 401 && result.message === "Invalid JWT") {
+            this.authTokenManager.token = undefined;
+            location.reload();
+          }
+        } catch (e) {
+          console.error("Error parsing response body", e);
         }
-      } catch (e) {
-        console.error("Error parsing response body", e);
+      } else if (this.authTokenManager.token) {
+        const { error } = await this.client.auth.getUser();
+        if (error) {
+          this.authTokenManager.token = undefined;
+          location.reload();
+        }
       }
     }
   }
