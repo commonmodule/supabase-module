@@ -34,6 +34,5 @@ export default class SupabaseConnector extends EventContainer<{
     subscribeToDataChanges<T extends {
         [key: string]: any;
     }>(channelName: string, options: SubscribeToDataChangesOptions<T>): RealtimeChannel;
-    uploadPublicFile(bucket: string, path: string, file: File): Promise<string>;
 }
 //# sourceMappingURL=SupabaseConnector.d.ts.map

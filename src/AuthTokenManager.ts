@@ -1,5 +1,5 @@
 import { Store } from "@common-module/app";
-import { EventContainer, KebabCase } from "@common-module/ts";
+import { EventContainer } from "@common-module/ts";
 
 export default class AuthTokenManager<
   E extends Record<string, (...args: any[]) => any> = Record<
@@ -9,11 +9,11 @@ export default class AuthTokenManager<
 > extends EventContainer<
   E & { tokenChanged: (token: string | undefined) => void }
 > {
-  protected store: Store<string>;
+  protected store: Store;
 
   constructor(storeName: string) {
     super();
-    this.store = new Store(storeName as KebabCase<string>);
+    this.store = new Store(storeName);
   }
 
   public get token(): string | undefined {

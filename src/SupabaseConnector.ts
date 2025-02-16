@@ -13,7 +13,6 @@ import {
   SupabaseClient,
   User as SupabaseUser,
 } from "@supabase/supabase-js";
-import { v4 as uuidv4 } from "uuid";
 import AuthTokenManager from "./AuthTokenManager.js";
 import SubscribeToDataChangesOptions from "./SubscribeToDataChangesOptions.js";
 import SubscribeToPresenceOptions from "./SubscribeToPresenceOptions.js";
@@ -23,7 +22,7 @@ export default class SupabaseConnector extends EventContainer<{
   sessionUserChanged: (user: SupabaseUser | undefined) => void;
 }> {
   private client!: SupabaseClient;
-  private store: Store<string>;
+  private store: Store;
   private sessionUser: SupabaseUser | undefined;
 
   constructor(
@@ -269,33 +268,5 @@ export default class SupabaseConnector extends EventContainer<{
       }
       if (error) console.error(status, error);
     });
-  }
-
-  public async uploadPublicFile(
-    bucket: string,
-    path: string,
-    file: File,
-  ): Promise<string> {
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${uuidv4()}.${fileExt}`;
-    const filePath = `${path}/${fileName}`;
-
-    const { error: uploadError } = await this.client.storage
-      .from(bucket)
-      .upload(filePath, file, {
-        cacheControl: "31536000",
-        contentType: file.type,
-      });
-
-    if (uploadError) {
-      await this.checkInvalidJwtError(uploadError);
-      throw uploadError;
-    }
-
-    const { data: { publicUrl } } = this.client.storage
-      .from(bucket)
-      .getPublicUrl(filePath);
-
-    return publicUrl;
   }
 }
