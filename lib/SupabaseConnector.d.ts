@@ -1,7 +1,7 @@
+import { AuthTokenManager } from "@common-module/app";
 import { EventContainer } from "@common-module/ts";
 import { PostgrestBuilder, PostgrestFilterBuilder, PostgrestQueryBuilder, PostgrestTransformBuilder } from "@supabase/postgrest-js";
 import { Provider, RealtimeChannel, User as SupabaseUser } from "@supabase/supabase-js";
-import AuthTokenManager from "./AuthTokenManager.js";
 import SubscribeToDataChangesOptions from "./SubscribeToDataChangesOptions.js";
 import SubscribeToPresenceOptions from "./SubscribeToPresenceOptions.js";
 export default class SupabaseConnector extends EventContainer<{
@@ -13,7 +13,7 @@ export default class SupabaseConnector extends EventContainer<{
     private client;
     private store;
     private sessionUser;
-    constructor(supabaseUrl: string, supabaseKey: string, authTokenManager?: AuthTokenManager<Record<string, (...args: any[]) => any>> | undefined);
+    constructor(supabaseUrl: string, supabaseKey: string, authTokenManager?: AuthTokenManager | undefined);
     private reconnect;
     signInWithOAuth(provider: Provider, scopes?: string[]): Promise<void>;
     signOut(): Promise<void>;

@@ -1,4 +1,4 @@
-import { Store } from "@common-module/app";
+import { AuthTokenManager, Store } from "@common-module/app";
 import { EventContainer, ObjectUtils } from "@common-module/ts";
 import {
   PostgrestBuilder,
@@ -13,7 +13,6 @@ import {
   SupabaseClient,
   User as SupabaseUser,
 } from "@supabase/supabase-js";
-import AuthTokenManager from "./AuthTokenManager.js";
 import SubscribeToDataChangesOptions from "./SubscribeToDataChangesOptions.js";
 import SubscribeToPresenceOptions from "./SubscribeToPresenceOptions.js";
 import SupabaseUtils from "./SupabaseUtils.js";
