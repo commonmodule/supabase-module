@@ -1,5 +1,5 @@
-import { AuthTokenManager, Store } from "@common-module/app";
-import { EventContainer, ObjectUtils } from "@common-module/ts";
+import { AuthTokenManager, Store } from "@commonmodule/app";
+import { EventContainer, ObjectUtils } from "@commonmodule/ts";
 import {
   PostgrestBuilder,
   PostgrestFilterBuilder,

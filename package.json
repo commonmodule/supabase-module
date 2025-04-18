@@ -1,5 +1,5 @@
 {
-  "name": "@common-module/supabase",
+  "name": "@commonmodule/supabase",
   "author": "yj.gaia",
   "homepage": "https://personas.gaia.cc/yj.gaia",
   "version": "0.1.8",
@@ -7,7 +7,7 @@
   "types": "./lib/index.d.ts",
   "main": "./lib/index.js",
   "dependencies": {
-    "@common-module/app": "^0.1.7",
+    "@commonmodule/app": "^0.1.7",
     "@supabase/supabase-js": "^2.48.1",
     "uuid": "^10.0.0"
   },

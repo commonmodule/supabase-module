@@ -1,5 +1,5 @@
-import { AuthTokenManager } from "@common-module/app";
-import { EventContainer } from "@common-module/ts";
+import { AuthTokenManager } from "@commonmodule/app";
+import { EventContainer } from "@commonmodule/ts";
 import { PostgrestBuilder, PostgrestFilterBuilder, PostgrestQueryBuilder, PostgrestTransformBuilder } from "@supabase/postgrest-js";
 import { Provider, RealtimeChannel, User as SupabaseUser } from "@supabase/supabase-js";
 import SubscribeToDataChangesOptions from "./SubscribeToDataChangesOptions.js";
